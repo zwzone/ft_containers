@@ -28,7 +28,7 @@ int main(void)
   std::vector<int> v1(3, 100);
   std::vector<int> v2(4, 200);
   v1.erase(v1.begin() + 1, v1.end());
-  print(v1.begin(), v2.end());
-  print(v1);
+  print(v1.begin(), v1.end());
+  print(v2);
   return (0);
 }

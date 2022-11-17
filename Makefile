@@ -1,6 +1,6 @@
 CCW		:= c++ -Wall -Wextra -Werror -std=c++98
 SRC		:= test.cpp
-PRG		:= pTest
+PRG		:= test
 
 all : ${PRG}
 
