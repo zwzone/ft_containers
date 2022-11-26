@@ -2,12 +2,11 @@
 #define VECTOR_HPP
 
 #include <memory>
-#include "MyIterVector.hpp"
 #include "utils.hpp"
-#include <iterator> // must be removed after !
-#include <string> // must be removed after !
+#include "reverse_iterator.hpp"
+#include "iterator_vector.hpp"
 
-#define SFINAAE(X) typename std::enable_if<!std::is_integral<X>::value, X>::type* = 0
+#define SFINAAE(X) typename ft::enable_if<!ft::is_integral<X>::value, X>::type* = 0
 
 namespace ft
 {
@@ -23,10 +22,10 @@ namespace ft
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer         pointer;
         typedef typename allocator_type::const_pointer   const_pointer;
-        typedef ft::MyIterVector<value_type>             iterator;
-        typedef ft::MyIterVector<const value_type>       const_iterator;
-        typedef std::reverse_iterator<iterator>          reverse_iterator;
-        typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+        typedef ft::iterator_vector<value_type>          iterator;
+        typedef ft::iterator_vector<const value_type>    const_iterator;
+        typedef ft::reverse_iterator<iterator>           reverse_iterator;
+        typedef ft::reverse_iterator<const_iterator>     const_reverse_iterator;
 
       private:
         allocator_type  _alloc;
@@ -40,9 +39,9 @@ namespace ft
             throw ( std::out_of_range
                   (
                    "vector::boundChecking: n (which is "
-                   +std::to_string(n)+
+                   +ft::to_string(n)+
                    ") >= this->size() (which is "
-                   +std::to_string(this->size())+
+                   +ft::to_string(this->size())+
                    ")"
                   )
                 );
@@ -103,7 +102,7 @@ namespace ft
         ~vector ()
         {
           this->clear();
-          _alloc.deallocate(_start, this->capacity());
+          if (_start) _alloc.deallocate(_start, this->capacity());
         }
 
         // ==========================>> Assignment <<==========================
@@ -133,10 +132,11 @@ namespace ft
             _alloc.construct(_end_S++, value);
         }
         template< class InputIt >
-        void assign ( InputIt first, InputIt last , SFINAAE(InputIt) )
+        void assign ( InputIt first, InputIt last, SFINAAE(InputIt) )
         {
+          this->clear();
           while (first != last)
-          { this->push_back(*first); first++; }
+          { this->push_back(*first); ++first; }
         }
         // [*] // allocator_type get_allocator () const;
         allocator_type get_allocator ( void ) const { return ( _alloc ); }
@@ -185,11 +185,11 @@ namespace ft
         // [*] // reverse_iterator rbegin ();
         // [*] // const_reverse_iterator rbegin () const;
         reverse_iterator rbegin ( void ) { return (reverse_iterator(this->end())); }
-        const_reverse_iterator rbegin ( void ) const { return (reverse_iterator(this->end())); }
+        const_reverse_iterator rbegin ( void ) const { return (const_reverse_iterator(const_iterator(_end_S))); }
         // [*] // reverse_iterator rend ();
         // [*] // const_reverse_iterator rend () const;
         reverse_iterator rend ( void ) { return (reverse_iterator(this->begin())); }
-        const_reverse_iterator rend ( void ) const { return (reverse_iterator(this->begin())); }
+        const_reverse_iterator rend ( void ) const { return (const_reverse_iterator(const_iterator(_start))); }
 
         // ============================>> Capacity <<============================
 
@@ -212,6 +212,7 @@ namespace ft
 
             for (pointer ptr = _start; ptr < _end_S; ptr++, new_end_S++)
               _alloc.construct(new_end_S, *ptr);
+            this->clear();
             if (_start) _alloc.deallocate(_start, this->capacity());
 
             _start = new_start;
@@ -227,28 +228,75 @@ namespace ft
         // [*] // void clear();
         void clear ( void )
         {
-          while (_start < _end_S)
+          while (this->size())
           { _end_S--; _alloc.destroy(_end_S); }
         }
-        // [*] // iterator insert( const_iterator pos, const T& value );
-        // [*] // iterator insert( const_iterator pos, size_type count, const T& value );
-        // [ ] // template< class InputIt > iterator insert( const_iterator pos, InputIt first, InputIt last );
-        iterator insert ( const_iterator pos, const_reference value )
-        { this->insert(pos, 1, value); }
-        iterator insert( const_iterator pos, size_type count, const_reference value )
+        // [*] // iterator insert (iterator position, const value_type& val);
+        // [*] // void insert (iterator position, size_type n, const value_type& val);
+        // [*] // template <class InputIterator> void insert (iterator position, InputIterator first, InputIterator last);
+        iterator insert ( iterator pos, const_reference value )
         {
-          const_pointer ptr_pos = &(*pos);
-          if (count == 0) return (iterator(ptr_pos));
+          pointer ptr_pos = pos.base();
+          if (this->capacity() >= this->size() + size_type(1))
+          {
+            pointer ptr = _end_S;
+            while (--ptr >= ptr_pos)
+            {
+              _alloc.construct(ptr + 1, *ptr);
+              _alloc.destroy(ptr);
+            }
+            _alloc.construct(ptr + 1, value);
+            _end_S++;
+          }
+          else
+          {
+            size_type new_cap = (this->capacity() == 0) ? 1 : this->capacity() * 2;
+
+            pointer new_start = _alloc.allocate( new_cap );
+            pointer new_end_S = new_start;
+            pointer new_end_C = new_start + new_cap;
+
+            pointer ptr1 = _start, ptr2 = new_start;
+
+            while (ptr1 && ptr1 < ptr_pos)
+            {
+              _alloc.construct(ptr2, *ptr1);
+              _alloc.destroy(ptr1);
+              ++ptr1; ++ptr2;
+            }
+            pos = iterator(ptr2);
+            _alloc.construct(ptr2++, value);
+            while (ptr1 && ptr1 < _end_S)
+            {
+              _alloc.construct(ptr2, *ptr1);
+              _alloc.destroy(ptr1);
+              ++ptr1; ++ptr2;
+            }
+
+            if (_start) _alloc.deallocate(_start, this->capacity());
+            new_end_S = ptr2;
+
+            _start = new_start;
+            _end_S = new_end_S;
+            _end_C = new_end_C;
+          }
+          return (pos);
+        }
+        void insert( iterator pos, size_type count, const_reference value )
+        {
+          pointer ptr_pos = pos.base();
+          if (count == 0) return ;
           else if (this->capacity() >= count + this->size())
           {
             pointer ptr = _end_S;
-            while (ptr-- > ptr_pos)
+            while (--ptr >= ptr_pos)
             {
               _alloc.construct(ptr + count, *ptr);
               _alloc.destroy(ptr);
             }
-            for (size_type i = size_type(); i < count; i++)
+            for (size_type i = size_type(1); i <= count; ++i)
               _alloc.construct(ptr + i, value);
+            _end_S += count;
           }
           else
           {
@@ -262,52 +310,91 @@ namespace ft
 
             pointer ptr1 = _start, ptr2 = new_start;
 
-            while (ptr1 < ptr_pos)
+            while (ptr1 && ptr1 < ptr_pos)
             {
               _alloc.construct(ptr2, *ptr1);
               _alloc.destroy(ptr1);
-              ptr1++; ptr2++;
+              ++ptr1; ++ptr2;
             }
-            ptr_pos = ptr2;
-            for (size_type i = size_type(); i < count; i++)
-            {
+            for (size_type i = size_type(); i < count; ++i, ++ptr2)
               _alloc.construct(ptr2, value);
-              ptr2++;
-            }
-            while (ptr1 < _end_S)
+            while (ptr1 && ptr1 < _end_S)
             {
               _alloc.construct(ptr2, *ptr1);
               _alloc.destroy(ptr1);
-              ptr1++; ptr2++;
+              ++ptr1; ++ptr2;
             }
 
-            _alloc.deallocate(_start, this->capacity());
+            if (_start) _alloc.deallocate(_start, this->capacity());
+            new_end_S = ptr2;
 
             _start = new_start;
             _end_S = new_end_S;
             _end_C = new_end_C;
           }
-          return (iterator(ptr_pos));
         }
         template< class InputIt >
-        iterator insert( const_iterator pos, InputIt first, InputIt last, SFINAAE(InputIt) )
+        void insert( iterator pos, InputIt _first, InputIt _last, SFINAAE(InputIt) )
         {
-          (void)pos;
-          (void)first;
-          (void)last;
-          return (nullptr);
+          vector<value_type> tmp(_first, _last);
+          iterator first = tmp.begin();
+          iterator last = tmp.end();
+
+          pointer ptr_pos = pos.base();
+          size_type count = ft::distance(first, last);
+          if (count == 0) return ;
+          else if (this->capacity() >= count + this->size())
+          {
+            pointer ptr = _end_S;
+            while (--ptr >= ptr_pos)
+            {
+              _alloc.construct(ptr + count, *ptr);
+              _alloc.destroy(ptr);
+            }
+            for (size_type i = size_type(1); i <= count; ++i, ++first)
+              _alloc.construct(ptr + i, *first);
+            _end_S += count;
+          }
+          else
+          {
+            size_type new_cap = (this->capacity() == 0) ? 1 : this->capacity() * 2;
+            if (this->capacity() * 2 < this->size() + count)
+              new_cap = this->size() + count;
+
+            pointer new_start = _alloc.allocate( new_cap );
+            pointer new_end_S = new_start;
+            pointer new_end_C = new_start + new_cap;
+
+            pointer ptr1 = _start, ptr2 = new_start;
+
+            while (ptr1 && ptr1 < ptr_pos)
+            {
+              _alloc.construct(ptr2, *ptr1);
+              _alloc.destroy(ptr1);
+              ++ptr1; ++ptr2;
+            }
+            for (size_type i = size_type(); i < count; ++i, ++first, ++ptr2)
+              _alloc.construct(ptr2, *first);
+            while (ptr1 && ptr1 < _end_S)
+            {
+              _alloc.construct(ptr2, *ptr1);
+              _alloc.destroy(ptr1);
+              ++ptr1; ++ptr2;
+            }
+
+            if (_start) _alloc.deallocate(_start, this->capacity());
+            new_end_S = ptr2;
+
+            _start = new_start;
+            _end_S = new_end_S;
+            _end_C = new_end_C;
+          }
         }
         // [*] // iterator erase( iterator pos );
         // [*] // iterator erase( iterator first, iterator last );
         iterator erase ( iterator pos )
         {
-          pointer ptr_pos = &(*pos);
-          pointer ptr = ptr_pos;
-          _alloc.destroy(ptr);
-          while (++ptr < _end_S)
-            *(ptr - 1) = *ptr;
-          _alloc.destroy(--_end_S);
-          return (iterator(ptr_pos));
+          return (erase(pos, pos + 1));
         }
         iterator erase( iterator first, iterator last )
         {
@@ -355,13 +442,13 @@ namespace ft
         // [*] // void swap( vector& other );
         void swap ( vector& other )
         {
-          if (*this == other)
+          if (this == &other)
             return ;
 
           allocator_type save_alloc = other._alloc;
-          pointer save_start = other._start;
-          pointer save_end_S = other._end_S;
-          pointer save_end_C = other._end_C;
+          pointer        save_start = other._start;
+          pointer        save_end_S = other._end_S;
+          pointer        save_end_C = other._end_C;
 
           other._alloc = this->_alloc;
           other._start = this->_start;
@@ -411,9 +498,9 @@ namespace ft
       const_iterator lbIt = lhs.begin();
       const_iterator leIt = lhs.end();
       const_iterator rbIt = rhs.begin();
-      const_iterator reIt = lhs.end();
+      const_iterator reIt = rhs.end();
 
-      return (ft::lexicographical_compare(lbIt, leIt, rbIt, reIt));
+      return (ft::lexicographical_compare(lbIt, leIt, rbIt, reIt) && lhs != rhs);
     }
 
   template< class T, class Alloc >
@@ -424,9 +511,9 @@ namespace ft
       const_iterator lbIt = lhs.begin();
       const_iterator leIt = lhs.end();
       const_iterator rbIt = rhs.begin();
-      const_iterator reIt = lhs.end();
+      const_iterator reIt = rhs.end();
 
-      return (!ft::lexicographical_compare(lbIt, leIt, rbIt, reIt));
+      return (!ft::lexicographical_compare(lbIt, leIt, rbIt, reIt) && lhs != rhs);
     }
 
   template< class T, class Alloc >
@@ -445,6 +532,5 @@ namespace ft
     void swap( ft::vector<T,Alloc>& lhs, ft::vector<T,Alloc>& rhs )
     { lhs.swap(rhs); }
 };
-
 
 #endif
