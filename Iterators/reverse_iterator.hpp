@@ -31,7 +31,7 @@ namespace ft
 
         ~reverse_iterator()                                                         { }
 
-        Iterator base() const { return (_it.base()); }
+        Iterator base() const { return (_it); }
 
         reference       operator* ()        { Iterator it(_it); return (*(--it)); }
         const reference operator* () const  { Iterator it(_it); return (*(--it)); }

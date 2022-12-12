@@ -2,9 +2,9 @@
 #define VECTOR_HPP
 
 #include <memory>
-#include "utils.hpp"
-#include "reverse_iterator.hpp"
-#include "iterator_vector.hpp"
+#include "utilities/utils.hpp"
+#include "Iterators/reverse_iterator.hpp"
+#include "Iterators/iterator_vector.hpp"
 
 #define SFINAAE(X) typename ft::enable_if<!ft::is_integral<X>::value, X>::type* = 0
 

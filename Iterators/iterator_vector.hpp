@@ -84,18 +84,12 @@ namespace ft
   };
 
   // ========>> Relational Operators <<========
-  template < class Itr1, class Itr2 >
-    bool operator== ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() == rhs.base()); }
-  template < class Itr1, class Itr2 >
-    bool operator!= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() != rhs.base()); }
-  template < class Itr1, class Itr2 >
-    bool operator> ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs )  { return (lhs.base() > rhs.base()); }
-  template < class Itr1, class Itr2 >
-    bool operator< ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs )  { return (lhs.base() < rhs.base()); }
-  template < class Itr1, class Itr2 >
-    bool operator>= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() >= rhs.base()); }
-  template < class Itr1, class Itr2 >
-    bool operator<= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() <= rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator== ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() == rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator!= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() != rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator>  ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() >  rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator<  ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() <  rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator>= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() >= rhs.base()); }
+  template < class Itr1, class Itr2 > bool operator<= ( const iterator_vector<Itr1> & lhs, const iterator_vector<Itr2> & rhs ) { return (lhs.base() <= rhs.base()); }
 }
 
 #endif

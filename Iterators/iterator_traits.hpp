@@ -38,14 +38,16 @@ namespace ft
     typedef random_access_iterator_tag  iterator_category;
   };
 
-  template <
+  template
+  <
     class Category,
     class T,
-    class Value = typename iterator_traits<T*>::value_type,
-    class Pointer = typename iterator_traits<T*>::pointer,
+    class Value     = typename iterator_traits<T*>::value_type,
+    class Pointer   = typename iterator_traits<T*>::pointer,
     class Reference = typename iterator_traits<T*>::reference,
-    class Distance = ptrdiff_t
-  > struct iterator
+    class Distance  = typename iterator_traits<T*>::difference_type
+  >
+  struct iterator
   {
     typedef Value     value_type;
     typedef Pointer   pointer;
