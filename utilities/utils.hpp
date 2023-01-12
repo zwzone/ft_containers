@@ -2,6 +2,7 @@
 #define UTILS_HPP
 
 #include <string>
+#include <memory>
 #include "../Iterators/iterator_traits.hpp"
 #include "enable_if.hpp"
 #include "is_integral.hpp"
@@ -20,21 +21,6 @@ namespace ft
       { ++first; ++result; }
       return (result);
     }
-
-  std::string to_string (unsigned long long val)
-  {
-    std::string str;
-    unsigned long long ten = 1;
-    while ( val / ten )
-      ten *= 10;
-    while ( val )
-    {
-      str.push_back('0' + ((val % ten) / (ten / 10)));
-      val /= 10;
-      ten /= 10;
-    }
-    return (str);
-  }
 }
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-#include <memory>
 #include "utilities/utils.hpp"
 #include "Iterators/reverse_iterator.hpp"
 #include "Iterators/iterator_vector.hpp"
@@ -36,15 +35,7 @@ namespace ft
         void boundChecking(const size_type& n) const
         {
           if (n >= this->size())
-            throw ( std::out_of_range
-                  (
-                   "vector::boundChecking: n (which is "
-                   +ft::to_string(n)+
-                   ") >= this->size() (which is "
-                   +ft::to_string(this->size())+
-                   ")"
-                  )
-                );
+            throw ( std::out_of_range ( "vector" ) );
         }
 
       public:

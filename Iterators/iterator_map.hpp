@@ -1,6 +1,8 @@
 #ifndef ITERATOR_MAP_HPP
 #define ITERATOR_MAP_HPP
 
+#include "../utilities/utils.hpp"
+
 namespace ft
 {
   template < class T, class Node>
@@ -48,33 +50,25 @@ namespace ft
       nodePointer   base() const     { return (_p); }
 
       // ========>> Dereferencing <<========
-      reference       operator* ()        { return (_p->_value); }
-      const reference operator* () const  { return (_p->_value); }
+      reference       operator* ()        { return (*_p->_value); }
+      const reference operator* () const  { return (*_p->_value); }
       pointer         operator-> ()       { return (&operator*()); }
       const pointer   operator-> () const { return (&operator*()); }
 
       // ========>> Increment Operators <<========
       iterator_map & operator++ ()
       {
-        if ( _p == nullptr )
-        {
+        if ( _p == nullptr ) {
           _p = *_root;
           while (_p && _p->_left)
             _p = _p->_left;
-        }
-        else if ( _p->_right )
-        {
+        } else if ( _p->_right ) {
           _p = _p->_right;
           while (_p->_left)
             _p = _p->_left;
-        }
-        else if ( _p->_parent )
-        {
-          if (_p->_isRight)
-          {
-            while (_p && _p->_isRight)
-              _p = _p->_parent;
-          }
+        } else {
+          while (_p && _p->_isRight)
+            _p = _p->_parent;
           if (_p) _p = _p->_parent;
         }
         return (*this);
@@ -89,25 +83,17 @@ namespace ft
       // ========>> Decrement Operators <<========
       iterator_map & operator-- ()
       {
-        if ( _p == nullptr )
-        {
+        if ( _p == nullptr ) {
           _p = *_root;
           while (_p && _p->_right)
             _p = _p->_right;
-        }
-        if ( _p->_left )
-        {
+        } else if ( _p->_left ) {
           _p = _p->_left;
           while (_p->_right)
             _p = _p->_right;
-        }
-        else if ( _p->_parent )
-        {
-          if (!_p->_isRight)
-          {
-            while (_p && !_p->isRight)
-              _p = _p->_parent;
-          }
+        } else {
+          while (_p && !_p->isRight)
+            _p = _p->_parent;
           if (_p) _p = _p->_parent;
         }
         return (*this);

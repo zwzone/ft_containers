@@ -1,11 +1,14 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include <iostream>
 #include <memory>
-#include "utilities/red_black_tree.hpp"
 #include "Iterators/reverse_iterator.hpp"
 #include "Iterators/iterator_map.hpp"
+#include "utilities/red_black_tree.hpp"
 #include "utilities/pair.hpp"
+#include "utilities/enable_if.hpp"
+#include "utilities/is_integral.hpp"
 
 #define SFINAAE(X) typename ft::enable_if<!ft::is_integral<X>::value, X>::type* = 0
 
@@ -24,23 +27,23 @@ namespace ft
         struct Node;
 
       public:
-        typedef Key                                       key_type;
-        typedef T                                         mapped_type;
-        typedef ft::pair<const key_type, mapped_type>     value_type;
-        typedef Compare                                   key_compare;
-        typedef Compare                                   value_compare;
-        typedef Alloc                                     allocator_type;
+        typedef Key                                           key_type;
+        typedef T                                             mapped_type;
+        typedef ft::pair<const key_type, mapped_type>         value_type;
+        typedef Compare                                       key_compare;
+        typedef Compare                                       value_compare;
+        typedef Alloc                                         allocator_type;
         typedef typename Alloc::template rebind<Node>::other  allocator_node_type;
-        typedef typename allocator_type::reference        reference;
-        typedef typename allocator_type::const_reference  const_reference;
-        typedef typename allocator_type::pointer          pointer;
-        typedef typename allocator_type::const_pointer    const_pointer;
-        typedef typename allocator_type::difference_type  difference_type;
-        typedef typename allocator_type::size_type        size_type;
-        typedef ft::iterator_map<value_type, Node>        iterator;
-        typedef ft::iterator_map<const value_type, Node>  const_iterator;
-        typedef ft::reverse_iterator<iterator>            reverse_iterator;
-        typedef ft::reverse_iterator<const_iterator>      const_reverse_iterator;
+        typedef typename allocator_type::reference            reference;
+        typedef typename allocator_type::const_reference      const_reference;
+        typedef typename allocator_type::pointer              pointer;
+        typedef typename allocator_type::const_pointer        const_pointer;
+        typedef typename allocator_type::difference_type      difference_type;
+        typedef typename allocator_type::size_type            size_type;
+        typedef ft::iterator_map<value_type, Node>            iterator;
+        typedef ft::iterator_map<const value_type, Node>      const_iterator;
+        typedef ft::reverse_iterator<iterator>                reverse_iterator;
+        typedef ft::reverse_iterator<const_iterator>          const_reverse_iterator;
 
       private:
         key_compare           _comp;
@@ -62,28 +65,23 @@ namespace ft
           , _tree ( _comp, _alloc, _alloc_node )
         { }
         template < class InputIterator >
-          map ( InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type() )
+          map ( InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type(), SFINAAE(InputIterator) )
           : _comp ( comp )
           , _alloc ( alloc )
           , _alloc_node ( alloc )
           , _tree ( _comp, _alloc, _alloc_node )
         {
           while (first != last)
-            _tree.add(*(first++));
+            insert(*(first++));
         }
         map ( const map& x )
           : _comp ( x._comp )
           , _alloc ( x._alloc )
           , _alloc_node ( x._alloc_node )
-          , _tree ( _comp, _alloc, _alloc_node )
-        {
-          _tree.copy(x._tree);
-        }
+          , _tree ( x._tree )
+        { }
         map& operator=( const map& x )
         {
-          _comp = x._comp;
-          _alloc = x._alloc;
-          _alloc_node = x._alloc_node;
           _tree = x._tree;
           return (*this);
         }
@@ -98,7 +96,7 @@ namespace ft
         {
           Node * findNode = _tree.find(k);
           if ( findNode )
-            return (findNode->_value.second);
+            return (findNode->_value->second);
           else
             throw (std::out_of_range("<Something>"));
         }
@@ -106,9 +104,9 @@ namespace ft
         {
           Node * findNode = _tree.find(k);
           if ( findNode )
-            return (findNode->_value.second);
+            return (findNode->_value->second);
           else
-            throw (std::out_of_range("<Something>"));
+            throw (std::out_of_range("map"));
         }
         mapped_type& operator[] (const key_type& k)
         {
@@ -151,7 +149,11 @@ namespace ft
         {
           Node * findNode = _tree.find(val.first);
           if ( findNode )
+          {
+            _alloc.destroy(findNode->_value);
+            _alloc.construct(findNode->_value, val);
             return (ft::make_pair<iterator,bool>(iterator(_tree.base(), findNode), false));
+          }
           findNode = _tree.add(val);
           return (ft::make_pair<iterator,bool>(iterator(_tree.base(), findNode), true));
         }
@@ -192,6 +194,7 @@ namespace ft
           typedef typename Alloc::template rebind<Node>::other  allocator_node_type;
 
           typedef typename allocator_type::size_type            size_type;
+          typedef typename allocator_node_type::size_type       size_node_type;
 
           value_type          * _value;
           Node                * _left;
@@ -199,12 +202,12 @@ namespace ft
           Node                * _parent;
           bool                _isRed, _isRight;
 
-          Node (const value_type & value = value_type(),
+          Node (value_type * const & value = nullptr,
                 Node * const & left = nullptr,
                 Node * const & right = nullptr,
                 Node * const & parent = nullptr,
                 const bool & isRed = true,
-                const bool & isRight = true )
+                const bool & isRight = true)
             : _value(value)
             , _left(left)
             , _right(right)
@@ -214,24 +217,24 @@ namespace ft
           { }
 
           Node ( const Node & copy )
-            : _value(copy._value)
+            : _value(nullptr)
             , _left(nullptr)
             , _right(nullptr)
             , _parent(nullptr)
             , _isRed(copy._isRed)
             , _isRight(copy._isRight)
-          { std::cout << "NOOOOOOOOOOOOO COPY CONSTRUCTOOOOOOORR !" << std::endl; }
+          { /*std::cout << "NOOOOOOOOOOOOO COPY CONSTRUCTOOOOOOORR !" << std::endl;*/ }
 
           Node &operator=( const Node & copy )
           {
-            _value = copy._value;
+            _value = nullptr;
             _left = nullptr;
             _right = nullptr;
             _parent = nullptr;
             _isRed = copy._isRed;
             _isRight = copy._isRight;
 
-            std::cout << "NOOOOOOOOOOOOO COPY ASSIGNMENT OPERATOOOOOOOOOOORRR !" << std::endl;
+            // std::cout << "NOOOOOOOOOOOOO COPY ASSIGNMENT OPERATOOOOOOOOOOORRR !" << std::endl;
 
             return (*this);
           }
@@ -266,7 +269,7 @@ namespace ft
 
           bool lessThan ( const Node * const node, const key_compare & comp )
           {
-            return ( comp ( this->_value.first, node->_value.first ) );
+            return ( comp ( this->_value->first, node->_value->first ) );
           }
         };
     };
