@@ -22,23 +22,22 @@ class Compare = std::less<Key>,
 class Alloc = std::allocator< ft::pair<const Key,T> >
 >
 class map {
-private:
-  struct Node;
-
 public:
-  struct value_compare;
   typedef Key                                           key_type;
   typedef T                                             mapped_type;
   typedef ft::pair<const key_type, mapped_type>         value_type;
   typedef Alloc                                         allocator_type;
   typedef Compare                                       key_compare;
-  typedef typename Alloc::template rebind<Node>::other  allocator_node_type;
+  struct                                                value_compare;
   typedef typename allocator_type::reference            reference;
   typedef typename allocator_type::const_reference      const_reference;
   typedef typename allocator_type::pointer              pointer;
   typedef typename allocator_type::const_pointer        const_pointer;
   typedef typename allocator_type::difference_type      difference_type;
   typedef typename allocator_type::size_type            size_type;
+private:
+  typedef typename RedBlackTree<map>::Node Node;
+public:
   typedef ft::iterator_map<value_type, Node>            iterator;
   typedef ft::iterator_map<const value_type, Node>      const_iterator;
   typedef ft::reverse_iterator<iterator>                reverse_iterator;
@@ -47,8 +46,7 @@ public:
 private:
   key_compare           _comp;
   allocator_type        _alloc;
-  allocator_node_type   _alloc_node;
-  RedBlackTree< Node >  _tree;
+  RedBlackTree< map >   _tree;
 
 public:
   // [*] // explicit map ( const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type() );
@@ -60,15 +58,13 @@ public:
   explicit map ( const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type() )
     : _comp ( comp )
     , _alloc ( alloc )
-    , _alloc_node ( alloc )
-    , _tree ( _comp, _alloc, _alloc_node )
+    , _tree ( _comp, _alloc )
   { }
   template < class InputIterator >
   map ( InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type(), SFINAAE(InputIterator) )
     : _comp ( comp )
     , _alloc ( alloc )
-    , _alloc_node ( alloc )
-    , _tree ( _comp, _alloc, _alloc_node )
+    , _tree ( _comp, _alloc )
   {
     while (first != last)
       insert(*(first++));
@@ -76,7 +72,6 @@ public:
   map ( const map& x )
     : _comp ( x._comp )
     , _alloc ( x._alloc )
-    , _alloc_node ( x._alloc_node )
     , _tree ( x._tree )
   { }
   map& operator=( const map& x ) {
@@ -268,124 +263,19 @@ public:
   pair<const_iterator,const_iterator> equal_range (const key_type& k) const
   { return (ft::make_pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k))); }
 
-  // ---------------- Node Class ----------------
-private:
-  struct Node {
-    typedef Key                                           key_type;
-    typedef T                                             mapped_type;
-    typedef ft::pair<const key_type, mapped_type>         value_type;
-    typedef Compare                                       key_compare;
-    typedef Alloc                                         allocator_type;
-    typedef typename Alloc::template rebind<Node>::other  allocator_node_type;
-
-    typedef typename allocator_type::size_type            size_type;
-    typedef typename allocator_node_type::size_type       size_node_type;
-
-    value_type          * _value;
-    Node                * _left;
-    Node                * _right;
-    Node                * _parent;
-    bool                _isRed, _isRight;
-
-    Node (value_type * const & value = nullptr,
-          Node * const & left = nullptr,
-          Node * const & right = nullptr,
-          Node * const & parent = nullptr,
-          const bool & isRed = true,
-          const bool & isRight = true)
-      : _value(value)
-      , _left(left)
-      , _right(right)
-      , _parent(parent)
-      , _isRed(isRed)
-      , _isRight(isRight)
-    { }
-
-    Node ( const Node & copy )
-      : _value(nullptr)
-      , _left(nullptr)
-      , _right(nullptr)
-      , _parent(nullptr)
-      , _isRed(copy._isRed)
-      , _isRight(copy._isRight)
-    { /*std::cout << "NOOOOOOOOOOOOO COPY CONSTRUCTOOOOOOORR !" << std::endl;*/ }
-
-    Node &operator=( const Node & copy ) {
-      _value = nullptr;
-      _left = nullptr;
-      _right = nullptr;
-      _parent = nullptr;
-      _isRed = copy._isRed;
-      _isRight = copy._isRight;
-
-      // std::cout << "NOOOOOOOOOOOOO COPY ASSIGNMENT OPERATOOOOOOOOOOORRR !" << std::endl;
-
-      return (*this);
-    }
-
-    ~Node()
-    { }
-
-    void swapValue ( Node * node, Node ** root ) {
-      Node ** _parent_child_node;
-      Node ** _parent_child_this;
-      bool iAmRoot = (*root == this);
-      Node * _left_tmp = node->_left;
-      Node * _right_tmp = node->_right;
-      Node * _parent_tmp = node->_parent;
-      bool _isRed_tmp = node->_isRed;
-      bool _isRight_tmp = node->_isRight;
-
-      _parent_child_node = (node->_isRight) ? &node->_parent->_right : &node->_parent->_left;
-      if (*_parent_child_node != node)
-        *_parent_child_node = this;
-      if (!iAmRoot) {
-        _parent_child_this = (this->_isRight) ? &this->_parent->_right : &this->_parent->_left;
-        *_parent_child_this = node;
-      }
-
-      if (_left && _left != node)   _left->_parent = node;
-      if (_right && _right != node) _right->_parent = node;
-      if (node->_left) node->_left->_parent = this;
-      if (node->_right) node->_right->_parent = this;
-
-      if (this->_left == node) node->_left = this;
-      else node->_left = _left;
-      _left = _left_tmp;
-
-      if (this->_right == node) node->_right = this;
-      else node->_right = _right;
-      _right = _right_tmp;
-
-      node->_parent = _parent;
-      if (_parent_tmp == this) _parent = node;
-      else _parent = _parent_tmp;
-
-      node->_isRed = _isRed;
-      _isRed = _isRed_tmp;
-
-      node->_isRight = _isRight;
-      _isRight = _isRight_tmp;
-
-      if (iAmRoot) *root = node;
-    }
-
-    bool lessThan ( const Node * const node, const key_compare & comp ) {
-      return ( comp ( this->_value->first, node->_value->first ) );
-    }
-  };
 public:
   struct value_compare {
   public:
     typedef bool result_type;
-    typedef value_type first_argument_type;
-    typedef value_type second_argument_type;
 
     Compare comp;
     value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
 
-    result_type operator() (const first_argument_type& x, const second_argument_type& y) const {
+    result_type operator() (const value_type& x, const value_type& y) const {
       return comp(x.first, y.first);
+    }
+    result_type operator() (const key_type& x, const key_type& y) const {
+      return comp(x, y);
     }
   };
 };

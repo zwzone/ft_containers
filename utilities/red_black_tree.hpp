@@ -60,25 +60,28 @@ void remove_node (typename Node::allocator_type & _alloc, typename Node::allocat
   _alloc_node.deallocate(node, size_node_type(1));
 }
 
-template < typename Node >
+template < typename Container >
 class RedBlackTree {
   // ---------------- Typedefs ----------------
 public:
-  typedef typename Node::key_type             key_type;
-  typedef typename Node::mapped_type          mapped_type;
-  typedef typename Node::value_type           value_type;
+  struct Node;
 
-  typedef typename Node::key_compare          key_compare;
-  typedef typename Node::allocator_type       allocator_type;
-  typedef typename Node::allocator_node_type  allocator_node_type;
+  typedef typename Container::key_type             key_type;
+  typedef typename Container::mapped_type          mapped_type;
+  typedef typename Container::value_type           value_type;
 
-  typedef typename Node::size_type            size_type;
+  typedef typename Container::value_compare                      value_compare;
+  typedef typename Container::allocator_type                     allocator_type;
+  typedef typename allocator_type::template rebind<Node>::other  allocator_node_type;
+
+  typedef typename allocator_type::size_type            size_type;
+  typedef typename allocator_node_type::size_type       size_node_type;
 
   // ---------------- Attributes ----------------
 private:
-  key_compare         & _comp;
+  value_compare       _comp;
   allocator_type      & _alloc;
-  allocator_node_type & _alloc_node;
+  allocator_node_type _alloc_node;
   Node                *_root;
   size_type           _size;
 
@@ -86,13 +89,12 @@ private:
 public:
   explicit RedBlackTree
   (
-    key_compare & comp = key_compare(),
-    allocator_type & alloc = allocator_type(),
-    allocator_node_type & alloc_node = allocator_node_type()
+    value_compare comp = value_compare(),
+    allocator_type & alloc = allocator_type()
   )
     : _comp(comp)
     , _alloc(alloc)
-    , _alloc_node(alloc_node)
+    , _alloc_node(alloc)
     , _root(nullptr)
     , _size(size_type())
   { }
@@ -290,9 +292,9 @@ private:
 private:
   //      0
   //       \
-    //        0
+  //        0
   //         \
-    //          0 ( the node )
+  //          0 ( the node )
   void _addNode_rotate_left ( Node * node )
   {
     Node * theParent = node->_parent;
@@ -343,7 +345,7 @@ private:
   }
   //      0
   //       \
-    //        0
+  //        0
   //       /
   //      0 ( the node )
   void _addNode_rotate_right_left ( Node * node )
@@ -548,68 +550,163 @@ private:
 private:
   //        0 ( the node )
   //       / \
-    //      0   0
+  //      0   0
   void _eraseNode_fix_rotate_right ( Node * node )
   {
     Node * leftChild = node->_left;
 
     leftChild->_parent = node->_parent;
-    if (node->_parent)
-    {
-      if (node->_isRight)
-      { node->_parent->_right = leftChild; leftChild->_isRight = true; }
-    else
-      { node->_parent->_left = leftChild; leftChild->_isRight = false; }
-    }
-  else
-    {
+    if (node->_parent) {
+      if (node->_isRight) {
+        node->_parent->_right = leftChild; leftChild->_isRight = true;
+      } else {
+        node->_parent->_left = leftChild; leftChild->_isRight = false;
+      }
+    } else {
       _root = leftChild;
       leftChild->_isRight = true;
     }
-
     node->_left = leftChild->_right;
-    if (leftChild->_right)
-    {
+    if (leftChild->_right) {
       leftChild->_right->_parent = node;
       leftChild->_right->_isRight = false;
     }
-
     leftChild->_right = node;
     node->_parent = leftChild;
     node->_isRight = true;
   }
   //        0 ( the node )
   //       / \
-    //      0   0
+  //      0   0
   void _eraseNode_fix_rotate_left ( Node * node )
   {
     Node * rightChild = node->_right;
 
     rightChild->_parent = node->_parent;
-    if (node->_parent)
-    {
-      if (node->_isRight)
-      { node->_parent->_right = rightChild; rightChild->_isRight = true; }
-    else
-      { node->_parent->_left = rightChild; rightChild->_isRight = false; }
-    }
-  else
-    {
+    if (node->_parent) {
+      if (node->_isRight) {
+        node->_parent->_right = rightChild; rightChild->_isRight = true;
+      } else {
+        node->_parent->_left = rightChild; rightChild->_isRight = false;
+      }
+    } else {
       _root = rightChild;
       rightChild->_isRight = true;
     }
-
     node->_right = rightChild->_left;
-    if (rightChild->_left)
-    {
+    if (rightChild->_left) {
       rightChild->_left->_parent = node;
       rightChild->_left->_isRight = true;
     }
-
     rightChild->_left = node;
     node->_parent = rightChild;
     node->_isRight = false;
   }
+
+  // ---------------- Node Class ----------------
+public:
+  struct Node {
+    typedef typename Container::key_type             key_type;
+    typedef typename Container::mapped_type          mapped_type;
+    typedef typename Container::value_type           value_type;
+
+    typedef typename Container::value_compare                      value_compare;
+    typedef typename Container::allocator_type                     allocator_type;
+    typedef typename allocator_type::template rebind<Node>::other  allocator_node_type;
+
+    typedef typename allocator_type::size_type            size_type;
+    typedef typename allocator_node_type::size_type       size_node_type;
+
+    value_type          * _value;
+    Node                * _left;
+    Node                * _right;
+    Node                * _parent;
+    bool                _isRed, _isRight;
+
+    Node (value_type * const & value = nullptr,
+          Node * const & left = nullptr,
+          Node * const & right = nullptr,
+          Node * const & parent = nullptr,
+          const bool & isRed = true,
+          const bool & isRight = true)
+      : _value(value)
+      , _left(left)
+      , _right(right)
+      , _parent(parent)
+      , _isRed(isRed)
+      , _isRight(isRight)
+    { }
+
+    Node ( const Node & copy )
+      : _value(nullptr)
+      , _left(nullptr)
+      , _right(nullptr)
+      , _parent(nullptr)
+      , _isRed(copy._isRed)
+      , _isRight(copy._isRight)
+    { }
+
+    Node &operator=( const Node & copy ) {
+      _value = nullptr;
+      _left = nullptr;
+      _right = nullptr;
+      _parent = nullptr;
+      _isRed = copy._isRed;
+      _isRight = copy._isRight;
+      return (*this);
+    }
+
+    ~Node()
+    { }
+
+    void swapValue ( Node * node, Node ** root ) {
+      Node ** _parent_child_node;
+      Node ** _parent_child_this;
+      bool iAmRoot = (*root == this);
+      Node * _left_tmp = node->_left;
+      Node * _right_tmp = node->_right;
+      Node * _parent_tmp = node->_parent;
+      bool _isRed_tmp = node->_isRed;
+      bool _isRight_tmp = node->_isRight;
+
+      _parent_child_node = (node->_isRight) ? &node->_parent->_right : &node->_parent->_left;
+      if (*_parent_child_node != node)
+        *_parent_child_node = this;
+      if (!iAmRoot) {
+        _parent_child_this = (this->_isRight) ? &this->_parent->_right : &this->_parent->_left;
+        *_parent_child_this = node;
+      }
+
+      if (_left && _left != node)   _left->_parent = node;
+      if (_right && _right != node) _right->_parent = node;
+      if (node->_left) node->_left->_parent = this;
+      if (node->_right) node->_right->_parent = this;
+
+      if (this->_left == node) node->_left = this;
+      else node->_left = _left;
+      _left = _left_tmp;
+
+      if (this->_right == node) node->_right = this;
+      else node->_right = _right;
+      _right = _right_tmp;
+
+      node->_parent = _parent;
+      if (_parent_tmp == this) _parent = node;
+      else _parent = _parent_tmp;
+
+      node->_isRed = _isRed;
+      _isRed = _isRed_tmp;
+
+      node->_isRight = _isRight;
+      _isRight = _isRight_tmp;
+
+      if (iAmRoot) *root = node;
+    }
+
+    bool lessThan ( const Node * const node, const value_compare & comp ) {
+      return ( comp ( this->_value, node->_value ) );
+    }
+  };
 };
 }
 
