@@ -6,13 +6,13 @@
 namespace ft
 {
 template < class T, class Node>
-class iterator_map : public ft::iterator<bidirectional_iterator_tag, T> {
+class iterator_map : public ft::iterator<std::bidirectional_iterator_tag, T> {
 public:
-  using typename ft::iterator<bidirectional_iterator_tag, T>::value_type;
-  using typename ft::iterator<bidirectional_iterator_tag, T>::pointer;
-  using typename ft::iterator<bidirectional_iterator_tag, T>::reference;
-  using typename ft::iterator<bidirectional_iterator_tag, T>::difference_type;
-  using typename ft::iterator<bidirectional_iterator_tag, T>::iterator_category;
+  using typename ft::iterator<std::bidirectional_iterator_tag, T>::value_type;
+  using typename ft::iterator<std::bidirectional_iterator_tag, T>::pointer;
+  using typename ft::iterator<std::bidirectional_iterator_tag, T>::reference;
+  using typename ft::iterator<std::bidirectional_iterator_tag, T>::difference_type;
+  using typename ft::iterator<std::bidirectional_iterator_tag, T>::iterator_category;
   typedef Node *        nodePointer;
 
 private:
@@ -102,12 +102,8 @@ public:
 };
 
 // ========>> Relational Operators <<========
-template < class Itr1, class Node1, class Itr2, class Node2 >
-bool operator== ( const iterator_map<Itr1, Node1> & lhs, const iterator_map<Itr2, Node2> & rhs )
-{ return (lhs.base() == rhs.base()); }
-template < class Itr1, class Node1, class Itr2, class Node2 >
-bool operator!= ( const iterator_map<Itr1, Node1> & lhs, const iterator_map<Itr2, Node2> & rhs )
-{ return (lhs.base() != rhs.base()); }
+template < class Itr1, class Node1, class Itr2, class Node2 > bool operator== ( const iterator_map<Itr1, Node1> & lhs, const iterator_map<Itr2, Node2> & rhs ) { return (lhs.base() == rhs.base()); }
+template < class Itr1, class Node1, class Itr2, class Node2 > bool operator!= ( const iterator_map<Itr1, Node1> & lhs, const iterator_map<Itr2, Node2> & rhs ) { return (lhs.base() != rhs.base()); }
 }
 
 #endif

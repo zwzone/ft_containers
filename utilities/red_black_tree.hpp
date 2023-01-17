@@ -1,7 +1,6 @@
 #ifndef RED_BLACK_TREE_MAP_HPP
 #define RED_BLACK_TREE_MAP_HPP
 
-#include "iostream"
 #include "utils.hpp"
 
 namespace ft
@@ -88,10 +87,7 @@ private:
   // ---------------- Constructor ----------------
 public:
   explicit RedBlackTree
-  (
-    value_compare comp = value_compare(),
-    allocator_type & alloc = allocator_type()
-  )
+  ( value_compare comp, allocator_type & alloc )
     : _comp(comp)
     , _alloc(alloc)
     , _alloc_node(alloc)
@@ -172,7 +168,7 @@ public:
     return (nullptr);
   }
 
-  // ---------------- Find ----------------
+  // ---------------- Swap ----------------
 public:
   void swap ( RedBlackTree & x )
   {
@@ -197,7 +193,6 @@ public:
     ++_size;
     return (node);
   }
-
 private:
   void _addNode ( Node * node )
   {
@@ -221,8 +216,6 @@ private:
     }
     _addNode_fix ( node );
   }
-
-private:
   void _addNode_fix ( Node * node )
   {
     while (node && node->_parent) {
@@ -234,8 +227,6 @@ private:
     }
     if (_root->_isRed) _root->_isRed = false;
   }
-
-private:
   void _addNode_correct ( Node * node )
   {
     if (node->_parent->_isRight) {
@@ -250,16 +241,12 @@ private:
         _addNode_rotate ( node ); // rotate
     }
   }
-
-private:
   void _addNode_colorFlip ( Node * node )
   {
     node->_isRed = true;
     if (node->_right) node->_right->_isRed = false;
     if (node->_left) node->_left->_isRed = false;
   }
-
-private:
   void _addNode_rotate ( Node * node )
   {
     if (node->_isRight) {
@@ -288,8 +275,6 @@ private:
       }
     }
   }
-
-private:
   //      0
   //       \
   //        0
@@ -415,7 +400,6 @@ public:
     --_size;
     return (true);
   }
-
 private:
   void _eraseNode ( Node * node ) // This is the node that have the value that we want to erase.
   {
@@ -423,8 +407,6 @@ private:
     else if (node->_left) node = _eraseNode_predecessor ( node );
     _eraseNode_R_or_B ( node );
   }
-
-private:
   Node * _eraseNode_successor ( Node * node )
   {
     Node * leafNode = node->_right;
@@ -441,8 +423,6 @@ private:
     node->swapValue(leafNode, &_root);
     return (node);
   }
-
-private:
   void _eraseNode_R_or_B ( Node * node ) // This function erases the actual node and fixes the violations.
   {
     Node * DBparent = node->_parent;
@@ -453,8 +433,6 @@ private:
     if ( _root && ItWasRed == false )
       _eraseNode_fix ( DBparent, ItWasRight );
   }
-
-private:
   void _erasingTheNode ( Node * node ) // ERASE THE NOOOOOODE.
   {
     if ( node->_parent == nullptr ) {
@@ -472,8 +450,6 @@ private:
     }
     remove_node<Node>( _alloc, _alloc_node, node );
   }
-
-private:
   void _eraseNode_fix ( Node * DBparent, const bool & DBisRight ) // Fix the violations.
   {
     if (DBparent == nullptr) return ;
@@ -495,8 +471,6 @@ private:
       }
     }
   }
-
-private:
   void _eraseNode_fix_sbR ( Node * DBparent, const bool & DBisRight ) // the sibling is Red
   {
     Node * DBsibling = ( DBisRight ) ? DBparent->_left : DBparent->_right;
@@ -508,7 +482,6 @@ private:
     else             _eraseNode_fix_rotate_left ( DBparent );
     _eraseNode_fix ( DBparent, DBisRight );
   }
-
   void _eraseNode_fix_sbB_nsB ( Node * DBparent, const bool & DBisRight ) // the sibling is Black & both nephews are Black
   {
     Node * DBsibling = ( DBisRight ) ? DBparent->_left : DBparent->_right;
@@ -546,8 +519,6 @@ private:
 
     _eraseNode_fix_sbB_fnR ( DBparent, DBisRight );
   }
-
-private:
   //        0 ( the node )
   //       / \
   //      0   0

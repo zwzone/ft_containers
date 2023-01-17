@@ -12,23 +12,23 @@ struct pair {
   first_type  first;
   second_type second;
 
-  // [ ] // pair ( );
-  // [ ] // template < class U, class V > pair ( const pair<U,V>& pr );
-  // [ ] // pair ( const first_type& a, const second_type& b );
-  // [ ] // pair& operator= ( const pair& pr );
+  // [*] // pair ( );
   pair ( )
     : first(first_type())
     , second(second_type())
   { }
+  // [*] // template < class U, class V > pair ( const pair<U,V>& pr );
   template < class U, class V >
   pair ( const pair<U,V> & pr )
     : first(pr.first)
     , second(pr.second)
   { }
+  // [*] // pair ( const first_type& a, const second_type& b );
   pair ( const first_type& a, const second_type& b )
     : first(a)
     , second(b)
   { }
+  // [*] // pair& operator= ( const pair& pr );
   pair& operator= ( const pair & pr ) {
     if (this == &pr) return (*this);
     this->first = pr.first;
@@ -45,8 +45,7 @@ template <class T1, class T2> bool operator>  (const pair<T1,T2>& lhs, const pai
 template <class T1, class T2> bool operator>= (const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) { return !(lhs<rhs); }
 
 template <class T1, class T2>
-ft::pair<T1,T2> make_pair ( T1 x, T2 y ) {
-  return ( ft::pair<T1, T2> ( x, y ) ); }
+ft::pair<T1,T2> make_pair ( T1 x, T2 y ) { return ( ft::pair<T1, T2> ( x, y ) ); }
 }
 
 #endif
