@@ -3,7 +3,7 @@
 
 #include "Iterators/iterator_vector.hpp"
 #include "Iterators/reverse_iterator.hpp"
-#include "utilities/utils.hpp"
+#include "utils.hpp"
 
 #define SFINAAE(X) typename ft::enable_if<!ft::is_integral<X>::value, X>::type* = 0
 

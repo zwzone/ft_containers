@@ -157,9 +157,9 @@ public:
   {
     Node * node = _root;
     while (node) {
-      if (_comp(k , node->_value->first)) {
+      if (_comp(k , *node->_value)) {
         node = node->_left;
-      } else if (_comp(node->_value->first, k)) {
+      } else if (_comp(*node->_value, k)) {
         node = node->_right;
       } else {
         return (node);
@@ -198,7 +198,7 @@ private:
   {
     Node * tmp = _root;
     while (true) {
-      if (_comp(node->_value->first, tmp->_value->first)) {
+      if (_comp(*node->_value, *tmp->_value)) {
         if (tmp->_left == nullptr) {
           tmp->_left = node;
           node->_parent = tmp;
@@ -389,9 +389,9 @@ public:
     Node * node = _root;
 
     while (node) {
-      if (_comp(k, node->_value->first)) {
+      if (_comp(k, *node->_value)) {
         node = node->_left;
-      } else if (_comp(node->_value->first, k)) {
+      } else if (_comp(*node->_value, k)) {
         node = node->_right;
       } else break ;
     }
