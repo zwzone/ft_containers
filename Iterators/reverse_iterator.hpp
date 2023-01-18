@@ -8,14 +8,15 @@ namespace ft
 template < class Iterator >
 class reverse_iterator {
 public:
-  typedef typename ft::iterator_traits<Iterator>::value_type        value_type;
-  typedef typename ft::iterator_traits<Iterator>::pointer           pointer;
-  typedef typename ft::iterator_traits<Iterator>::reference         reference;
-  typedef typename ft::iterator_traits<Iterator>::difference_type   difference_type;
-  typedef typename ft::iterator_traits<Iterator>::iterator_category iterator_category;
+  typedef Iterator                                                  iterator_type;
+  typedef typename ft::iterator_traits<iterator_type>::value_type        value_type;
+  typedef typename ft::iterator_traits<iterator_type>::pointer           pointer;
+  typedef typename ft::iterator_traits<iterator_type>::reference         reference;
+  typedef typename ft::iterator_traits<iterator_type>::difference_type   difference_type;
+  typedef typename ft::iterator_traits<iterator_type>::iterator_category iterator_category;
 
 private:
-  Iterator _it;
+  iterator_type _it;
 
 public:
   // ========>> Default Constructor <<========
@@ -30,7 +31,7 @@ public:
   { }
 
   // ========>> Custom Constructor <<========
-  reverse_iterator ( Iterator it )
+  reverse_iterator ( iterator_type it )
   : _it(it)
   { }
 
@@ -44,11 +45,11 @@ public:
   { }
 
   // ========>> Base <<========
-  Iterator base() const { return (_it); }
+  iterator_type base() const { return (_it); }
 
   // ========>> Dereferencing <<========
-  reference       operator*  ()       { Iterator it(_it); return (*(--it)); }
-  const reference operator*  () const { Iterator it(_it); return (*(--it)); }
+  reference       operator*  ()       { iterator_type it(_it); return (*(--it)); }
+  const reference operator*  () const { iterator_type it(_it); return (*(--it)); }
   pointer         operator-> ()       { return (&operator*()); }
   const pointer   operator-> () const { return (&operator*()); }
 
