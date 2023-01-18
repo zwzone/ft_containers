@@ -126,9 +126,7 @@ public:
   template< class InputIt >
   void assign ( InputIt first, InputIt last, SFINAAE(InputIt) )
   {
-    size_type count = ft::distance(first, last);
     this->clear();
-    this->reserve(count);
     while (first != last)
       { this->push_back(*first); ++first; }
   }
