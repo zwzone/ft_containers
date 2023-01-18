@@ -33,8 +33,7 @@ public:
   { }
 
   // ========>> Copy Constructor <<========
-  template < class U >
-  iterator_vector ( const iterator_vector<U> & copy )
+  iterator_vector ( const iterator_vector & copy )
   : _p(copy.base())
   { }
 
@@ -47,13 +46,15 @@ public:
   { }
 
   // ========>> Copy Assignment Operator <<========
-  template < class U >
-  iterator_vector &operator= ( const iterator_vector<U> & copy )
+  iterator_vector &operator= ( const iterator_vector & copy )
   { _p = copy.base(); return (*this); }
 
   // ========>> Destructor <<========
   ~iterator_vector ( )
   { }
+
+  // ========>> Convertion <<========
+  operator iterator_vector<const T>() { return iterator_vector<const T>(_p); }
 
   // ========>> Base <<========
   pointer base() const { return (_p); }
@@ -87,7 +88,8 @@ public:
   // ========>> Arithmetic Operators <<========
   iterator_vector operator- ( const difference_type & n ) const
   { return (iterator_vector(_p - n)); }
-  friend difference_type operator- ( const iterator_vector & lhs, const iterator_vector & rhs )
+  template < class U, class V >
+  friend difference_type operator- ( const iterator_vector<U> & lhs, const iterator_vector<V> & rhs )
   { return (lhs._p - rhs._p); }
 
   iterator_vector operator+ ( const difference_type & n ) const

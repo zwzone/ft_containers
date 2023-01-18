@@ -75,7 +75,8 @@ public:
   // ========>> Arithmetic Operators <<========
   reverse_iterator operator- ( const difference_type & n ) const
   { return (reverse_iterator(_it + n)); }
-  friend reverse_iterator::difference_type operator- ( const reverse_iterator & lhs, const reverse_iterator & rhs )
+  template < class Iter1, class Iter2 >
+  friend reverse_iterator::difference_type operator- ( const reverse_iterator<Iter1> & lhs, const reverse_iterator<Iter2> & rhs )
   { return (rhs._it - lhs._it); }
 
   reverse_iterator operator+ ( const difference_type & n ) const

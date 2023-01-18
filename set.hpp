@@ -32,7 +32,7 @@ public:
 private:
   typedef typename RedBlackTree<set>::Node Node;
 public:
-  typedef ft::iterator_tree<value_type, Node>           iterator;
+  typedef ft::iterator_tree<const value_type, Node>           iterator;
   typedef ft::iterator_tree<const value_type, Node>     const_iterator;
   typedef ft::reverse_iterator<iterator>                reverse_iterator;
   typedef ft::reverse_iterator<const_iterator>          const_reverse_iterator;

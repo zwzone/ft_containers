@@ -26,8 +26,7 @@ public:
   { }
 
   // ========>> Copy Constructor <<========
-  template < class U, class tmpNode >
-  iterator_tree ( const iterator_tree<U, tmpNode > & copy )
+  iterator_tree ( const iterator_tree & copy )
   : _root(copy.baseRoot()) , _p(copy.base())
   { }
 
@@ -36,13 +35,15 @@ public:
   { }
 
   // ========>> Copy Assignment Operator <<========
-  template < class U, class tmpNode >
-  iterator_tree &operator= ( const iterator_tree<U, tmpNode > & copy )
+  iterator_tree &operator= ( const iterator_tree & copy )
   { _root = copy.baseRoot(); _p = copy.base(); return (*this); }
 
   // ========>> Destructor <<========
   ~iterator_tree()
   { }
+
+  // ========>> Converter <<========
+  operator iterator_tree<const T, Node>() { return iterator_tree<const T, Node>(_root, _p); }
 
   // ========>> Base <<========
   nodePointer const * baseRoot() const { return (_root); }

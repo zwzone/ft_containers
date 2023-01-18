@@ -3,3 +3,6 @@
 Makefile
 test.cpp
 test
+a.out
+containers_test/
+ft_containers_tests/
